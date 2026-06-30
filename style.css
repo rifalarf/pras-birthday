@@ -136,8 +136,8 @@ body {
     text-shadow: 0 0 10px var(--cyan);
 }
 
-.heart {
-    color: var(--primary);
+.star {
+    color: #ffeb3b;
     animation: heartbeat 1s infinite alternate;
     display: inline-block;
 }
@@ -256,6 +256,23 @@ body {
     display: none !important;
 }
 
+/* LETTER BACKDROP */
+#letter-backdrop {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+#letter-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 /* ENVELOPE STYLES */
 .envelope {
     position: relative;
@@ -264,9 +281,20 @@ body {
     background: #ff7096;
     margin: 40px auto;
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    z-index: 21;
+    z-index: 20;
+    perspective: 1000px; /* Added for realistic 3D flap */
+}
+.envelope.open {
+    transform: translateY(50px); /* Move envelope down to make room for letter */
+    background: transparent;
+    box-shadow: none;
+    transition: background 0.3s ease 1.0s, box-shadow 0.3s ease 1.0s, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.envelope.open::before, .envelope.open::after, .envelope.open .flap {
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 1.0s;
 }
 .envelope::before, .envelope::after {
     content: '';
@@ -288,7 +316,7 @@ body {
     border-color: #ff9eaa #ff477e #ff477e #ff9eaa;
     top: 0;
     left: 0;
-    z-index: 21;
+    z-index: 22;
 }
 .flap {
     position: absolute;
@@ -300,12 +328,13 @@ body {
     border-color: #ffb3c6 transparent transparent transparent;
     transform-origin: top;
     left: 0;
-    transition: transform 0.6s 0.2s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.3s;
     z-index: 24;
 }
 .envelope.open .flap {
     transform: rotateX(180deg);
-    z-index: 21;
+    z-index: 19;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.3s;
 }
 .letter {
     position: absolute;
@@ -317,8 +346,7 @@ body {
     color: #000;
     font-size: 12px;
     padding: 20px 15px;
-    transition: transform 0.8s 0.8s, height 0.8s 0.8s;
-    z-index: 22;
+    z-index: 21;
     overflow: hidden;
     line-height: 1.6;
     font-family: 'Courier New', Courier, monospace;
@@ -328,10 +356,16 @@ body {
     text-align: left;
 }
 .envelope.open .letter {
-    transform: translateY(-80px); /* slide up */
-    height: 250px; /* unfold */
-    z-index: 25; /* come to front */
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+    animation: letterExtract 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+}
+
+@keyframes letterExtract {
+    0% { transform: translateY(0) scale(1); height: 160px; }
+    26% { transform: translateY(0) scale(1); height: 160px; }
+    53% { transform: translateY(-140px) scale(1); height: 160px; }
+    66% { transform: translateY(-140px) scale(1); height: 160px; }
+    100% { transform: translateY(20px) scale(1.1); height: 460px; }
 }
 
 /* CAKE STYLES */
@@ -345,12 +379,15 @@ body {
 .cake-container:active {
     transform: scale(0.98);
 }
-.cake-body {
-    font-size: 120px;
+.cake-body-img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
     position: relative;
     z-index: 5;
-    text-shadow: 0 0 20px var(--primary);
-    pointer-events: none; /* Let clicks pass to container */
+    pointer-events: none;
+    mix-blend-mode: screen; /* Blends perfectly with dark bg */
+    border-radius: 10px;
 }
 .candle {
     position: absolute;
@@ -359,13 +396,13 @@ body {
     background: linear-gradient(to right, #fff, #ffe0e0);
     border: 1px solid #ff477e;
     border-radius: 2px;
-    z-index: 4;
+    z-index: 6; /* Place candles in front of the cake */
     pointer-events: none; /* Let clicks pass to container */
 }
-/* Positioning the 3 candles above the emoji cake */
-#candle-1 { top: 0px; left: 40px; transform: rotate(-5deg); }
-#candle-2 { top: -10px; left: 65px; }
-#candle-3 { top: 0px; left: 90px; transform: rotate(5deg); }
+/* Positioning the 3 candles above the image cake */
+#candle-1 { top: 30px; left: 40px; transform: rotate(-5deg); }
+#candle-2 { top: 20px; left: 70px; }
+#candle-3 { top: 30px; left: 100px; transform: rotate(5deg); }
 
 .flame {
     position: absolute;
@@ -377,10 +414,37 @@ body {
     border-radius: 50% 50% 20% 20%;
     box-shadow: 0 0 10px #ffeb3b, 0 0 20px #ff9800;
     animation: flicker 0.1s infinite alternate;
-    transition: opacity 0.2s;
+    transform-origin: bottom center;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+.flame.blowing {
+    transform: skewX(-30deg) scale(0.8, 0.6) translate(-5px, 5px);
+    opacity: 0.6 !important;
 }
 .flame.off {
-    display: none;
+    transform: scale(0);
+    opacity: 0 !important;
+    animation: none;
+}
+/* Smoke effect */
+.candle::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 4px;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+}
+.candle.extinguished::after {
+    animation: smoke 1.5s ease-out forwards;
+}
+@keyframes smoke {
+    0% { transform: translateY(0) scale(1); opacity: 0.8; }
+    100% { transform: translateY(-30px) scale(4); opacity: 0; }
 }
 @keyframes flicker {
     0% { transform: scale(1) translate(0, 0); opacity: 1; }

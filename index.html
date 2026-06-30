@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Happy Birthday Kekei!</title>
+    <title>Happy Birthday Pras!</title>
     <!-- Google Fonts: Press Start 2P for retro feeling -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -22,10 +22,10 @@
     <div id="game-container">
         <!-- Start Screen -->
         <div id="start-screen" class="screen active">
-            <h1 class="title">CATCH MY HEART</h1>
-            <h2 class="subtitle">For Kekei <span class="heart">♥</span></h2>
+            <h1 class="title">CATCH THE STARS</h1>
+            <h2 class="subtitle">For Pras <span class="star">⭐</span></h2>
             <div class="instructions">
-                <p>Tangkap 12 Hati, 3 Boba, dan 8 Cokelat!</p>
+                <p>Tangkap 12 Bintang, 3 Boba, dan 8 Cokelat!</p>
                 <br>
                 <p style="color:var(--accent);">Geser jari atau mouse</p>
                 <p style="color:var(--accent);">untuk memindahkan keranjang.</p>
@@ -33,13 +33,13 @@
                 <p class="blink">TAP HERE TO START</p>
             </div>
             <!-- Decorative pixel art or CSS shapes can go here -->
-            <div class="pixel-deco bounce">💕</div>
+            <div class="pixel-deco bounce">✨</div>
         </div>
 
         <!-- Game Screen -->
         <div id="game-screen" class="screen">
             <div id="ui-bar">
-                <div id="score-display">❤️ 0/12 | 🧋 0/3 | 🍫 0/8</div>
+                <div id="score-display">⭐ 0/12 | 🧋 0/3 | 🍫 0/8</div>
             </div>
             <canvas id="game-canvas"></canvas>
 
@@ -60,6 +60,7 @@
 
         <!-- Letter Screen -->
         <div id="letter-screen" class="screen">
+            <div id="letter-backdrop"></div>
             <p class="subtitle" style="margin-bottom: 10px;">Seseorang mengirimimu surat...</p>
             <div class="envelope" id="envelope">
                 <div class="flap"></div>
@@ -70,7 +71,7 @@
             <p class="instructions blink" id="envelope-instruction" style="margin-top: 20px;">Ketuk amplop untuk membuka
             </p>
             <button id="btn-next-cake" class="game-btn"
-                style="display:none; margin-top: 15px; position: absolute; bottom: 30px; z-index: 10;">Lanjut
+                style="display:none; margin-top: 15px; position: absolute; bottom: 30px; z-index: 50;">Lanjut
                 >></button>
         </div>
 
@@ -89,7 +90,7 @@
                 <div class="candle" id="candle-3">
                     <div class="flame" style="animation-delay: 0.2s;"></div>
                 </div>
-                <div class="cake-body">🎂</div>
+                <img src="assets/cake.jpg" class="cake-body-img" alt="Kue Ulang Tahun">
             </div>
         </div>
 
@@ -99,13 +100,13 @@
 
             <!-- Polaroid Photo of Kekei -->
             <div class="polaroid">
-                <img src="assets/photo.jpg" alt="Foto Kekei"
+                <img src="assets/photo.jpg" alt="Foto Pras"
                     onerror="this.src='https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?w=400';">
-                <div class="caption">Hi Kekei manis</div>
+                <div class="caption">Hi Pras!</div>
             </div>
 
             <div class="message-box" style="margin-top: 15px;">
-                <p>Met ultah Kekei sayang!</p>
+                <p>Met ultah Pras!</p>
                 <br>
                 <p>Semoga semua harapan dan impian kamu terwujud. Di tahun yang baru ini, semoga kamu selalu diberikan
                     kebahagiaan, kesehatan, dan kelancaran untuk segalanya yaa.</p>
@@ -115,6 +116,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
 

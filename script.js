@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let animationId;
 
     // Default requirements
-    const WIN_REQS = { HEART: 12, BOBA: 3, CHOCO: 8 };
-    let caught = { HEART: 0, BOBA: 0, CHOCO: 0 };
+    const WIN_REQS = { STAR: 12, BOBA: 3, CHOCO: 8 };
+    let caught = { STAR: 0, BOBA: 0, CHOCO: 0 };
 
     // Virtual resolution for pixel art feel
     const GAME_WIDTH = 320;
@@ -157,40 +157,27 @@ document.addEventListener('DOMContentLoaded', () => {
             this.y = -this.size;
 
             const rand = Math.random();
-            if (rand < 0.6) this.type = 'HEART';
+            if (rand < 0.6) this.type = 'STAR';
             else if (rand < 0.75) this.type = 'BOBA';
             else if (rand < 0.9) this.type = 'CHOCO';
             else this.type = 'ROACH';
 
-            const totalCaught = caught.HEART + caught.BOBA + caught.CHOCO;
+            const totalCaught = caught.STAR + caught.BOBA + caught.CHOCO;
             this.speed = 2 + Math.random() * 3 + (totalCaught * 0.05);
 
-            this.colors = { 'HEART': '#ff477e' };
-            this.emojis = { 'BOBA': '🧋', 'CHOCO': '🍫', 'ROACH': '🪳' };
+            this.colors = { 'STAR': '#ffeb3b' };
+            this.emojis = { 'STAR': '⭐', 'BOBA': '🧋', 'CHOCO': '🍫', 'ROACH': '🪳' };
         }
         update() { this.y += this.speed; }
         draw(ctx) {
-            if (this.type === 'HEART') {
-                ctx.fillStyle = this.colors[this.type];
-                ctx.shadowBlur = 5;
-                ctx.shadowColor = this.colors[this.type];
-                const x = this.x, y = this.y + this.size * 0.1, size = this.size * 0.9;
-                ctx.beginPath();
-                ctx.moveTo(x + size / 2, y + size / 4);
-                ctx.bezierCurveTo(x + size, y, x + size, y + size / 2, x + size / 2, y + size);
-                ctx.bezierCurveTo(x, y + size / 2, x, y, x + size / 2, y + size / 4);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            } else {
-                ctx.font = `${this.size}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.save();
-                ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
-                if (this.type === 'ROACH') ctx.rotate(Math.PI / 4);
-                ctx.fillText(this.emojis[this.type], 0, 0);
-                ctx.restore();
-            }
+            ctx.font = `${this.size}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.save();
+            ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
+            if (this.type === 'ROACH') ctx.rotate(Math.PI / 4);
+            ctx.fillText(this.emojis[this.type], 0, 0);
+            ctx.restore();
         }
     }
 
@@ -278,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MAIN GAME LOGIC ---
 
     function initGame() {
-        caught = { HEART: 0, BOBA: 0, CHOCO: 0 };
+        caught = { STAR: 0, BOBA: 0, CHOCO: 0 };
         items = []; floatingTexts = []; particles = [];
         player.x = GAME_WIDTH / 2 - player.width / 2;
         targetX = GAME_WIDTH / 2;
@@ -370,12 +357,17 @@ document.addEventListener('DOMContentLoaded', () => {
             envelopeInstruction.style.display = 'none';
             sounds.start(); // sweet sound
 
+            // Show backdrop when letter unfolds
             setTimeout(() => {
-                const message = "Hi Kekei manis,<br><br>Makasih yaa udah hadir ke dunia ini dan menjadi bagian penting dalam hidup aku xixi.<br><br>Setiap senyummu sukses membuat hariku jauh lebih cerah.<br><br>Aku sayang kamu! 💕";
+                document.getElementById('letter-backdrop').classList.add('active');
+            }, 1000);
+
+            setTimeout(() => {
+                const message = GAME_CONFIG.letterMessage;
                 typewriterEffect(letterText, message, 50, () => {
                     btnNextCake.style.display = 'block';
                 });
-            }, 1200); // delay for flap opening and paper sliding
+            }, 1600); // Wait for letter to center and scale
         }
     });
 
@@ -395,11 +387,20 @@ document.addEventListener('DOMContentLoaded', () => {
         sounds.puff();
 
         const flames = document.querySelectorAll('.flame');
+        const candles = document.querySelectorAll('.candle');
+        
+        // Add blowing effect momentarily
+        flames.forEach(f => f.classList.add('blowing'));
+        setTimeout(() => {
+            flames.forEach(f => f.classList.remove('blowing'));
+        }, 150);
+
         const intensity = 1 - (blowCount / MAX_BLOW);
         flames.forEach(f => f.style.opacity = intensity * 0.8 + 0.2);
 
         if (blowCount >= MAX_BLOW) {
             flames.forEach(f => f.classList.add('off'));
+            candles.forEach(c => c.classList.add('extinguished'));
             cakeInstruction.innerHTML = "Yeayyy! Selamat ulang tahun!";
             cakeInstruction.classList.remove('blink');
             sounds.win();
@@ -421,14 +422,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getProgress() {
         if (gameState !== 'PLAYING' && gameState !== 'START') return 1.0;
-        const pHeart = Math.min(caught.HEART / WIN_REQS.HEART, 1);
+        const pStar = Math.min(caught.STAR / WIN_REQS.STAR, 1);
         const pBoba = Math.min(caught.BOBA / WIN_REQS.BOBA, 1);
         const pChoco = Math.min(caught.CHOCO / WIN_REQS.CHOCO, 1);
-        return (pHeart + pBoba + pChoco) / 3.0; // Average
+        return (pStar + pBoba + pChoco) / 3.0; // Average
     }
 
     function updateScoreDisplay() {
-        scoreDisplay.innerHTML = `❤️ ${caught.HEART}/${WIN_REQS.HEART} &nbsp;|&nbsp; 🧋 ${caught.BOBA}/${WIN_REQS.BOBA} &nbsp;|&nbsp; 🍫 ${caught.CHOCO}/${WIN_REQS.CHOCO}`;
+        scoreDisplay.innerHTML = `⭐ ${caught.STAR}/${WIN_REQS.STAR} &nbsp;|&nbsp; 🧋 ${caught.BOBA}/${WIN_REQS.BOBA} &nbsp;|&nbsp; 🍫 ${caught.CHOCO}/${WIN_REQS.CHOCO}`;
     }
 
     function resizeCanvas() {
@@ -478,17 +479,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.x <= player.x + player.width &&
                     item.y <= player.y + player.height) {
 
-                    if (item.type === 'HEART' || item.type === 'BOBA' || item.type === 'CHOCO') {
+                    if (item.type === 'STAR' || item.type === 'BOBA' || item.type === 'CHOCO') {
                         caught[item.type]++;
                         player.bounce();
 
-                        if (item.type === 'HEART') sounds.catchHeart();
-                        else sounds.catchStar();
+                        sounds.catchStar();
 
-                        floatingTexts.push(new FloatingText(item.x + item.size / 2, item.y, "+1", item.type === 'HEART' ? '#ff477e' : '#fff'));
+                        floatingTexts.push(new FloatingText(item.x + item.size / 2, item.y, "+1", item.type === 'STAR' ? '#ffeb3b' : '#fff'));
 
                     } else if (item.type === 'ROACH') {
-                        if (caught.HEART > 0) caught.HEART--;
+                        if (caught.STAR > 0) caught.STAR--;
                         else if (caught.CHOCO > 0) caught.CHOCO--;
                         else if (caught.BOBA > 0) caught.BOBA--;
 
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateScoreDisplay();
                     items.splice(i, 1);
 
-                    if (caught.HEART >= WIN_REQS.HEART && caught.BOBA >= WIN_REQS.BOBA && caught.CHOCO >= WIN_REQS.CHOCO) {
+                    if (caught.STAR >= WIN_REQS.STAR && caught.BOBA >= WIN_REQS.BOBA && caught.CHOCO >= WIN_REQS.CHOCO) {
                         sounds.win();
                         winGame();
                     }
@@ -589,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState === 'PLAYING' && (e.key === 'w' || e.key === 'W')) {
             console.log('Cheat activated: Instant Win');
             // Max out requirements
-            caught.HEART = WIN_REQS.HEART;
+            caught.STAR = WIN_REQS.STAR;
             caught.BOBA = WIN_REQS.BOBA;
             caught.CHOCO = WIN_REQS.CHOCO;
             updateScoreDisplay();
